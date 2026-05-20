@@ -4,7 +4,7 @@ const TOOLS = [
   { id: 'arrow',  icon: '→',  label: 'Arrow' },
   { id: 'circle', icon: '○',  label: 'Circle' },
   { id: 'rect',   icon: '□',  label: 'Rect' },
-  { id: 'eraser', icon: '⌫',  label: 'Clear' },
+  { id: 'eraser', icon: '⌫',  label: 'Undo' },
 ]
 
 const COLORS = [
@@ -24,7 +24,7 @@ const SIZES = [
 
 export default function ToolPanel({
   tool, color, strokeSize, isPersist,
-  onTool, onColor, onStrokeSize, onPersist, onClear,
+  onTool, onColor, onStrokeSize, onPersist, onClear, onClearAll,
   isRecording, recSeconds, onStartRecord, onStopRecord,
 }) {
   return (
@@ -36,11 +36,19 @@ export default function ToolPanel({
             key={t.id}
             className={`tool-btn ${tool === t.id ? 'active' : ''}`}
             onClick={() => t.id === 'eraser' ? onClear() : onTool(t.id)}
-            title={t.label}
+            title={t.id === 'eraser' ? 'Undo last stroke (Backspace)' : t.label}
           >
             {t.icon}
           </button>
         ))}
+        <button
+          className="tool-btn"
+          onClick={onClearAll}
+          title="Clear all strokes"
+          style={{ fontSize: 13, color: 'var(--text-muted)' }}
+        >
+          ✕
+        </button>
       </div>
 
       <div className="tool-divider" />

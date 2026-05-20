@@ -200,9 +200,27 @@ export default function VideoAnnotator({
     }
   }
 
+  const undoLastStroke = useCallback(() => {
+    if (strokesRef.current.length > 0) {
+      strokesRef.current = strokesRef.current.slice(0, -1)
+    }
+  }, [])
+
+  // Backspace key removes the most recent stroke
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Backspace' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+        e.preventDefault()
+        undoLastStroke()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [undoLastStroke])
+
   const handlePointerDown = (e) => {
     if (toolRef.current === 'eraser') {
-      strokesRef.current = []
+      undoLastStroke()
       return
     }
     e.preventDefault()
@@ -339,7 +357,8 @@ export default function VideoAnnotator({
         onColor={onColor}
         onStrokeSize={onStrokeSize}
         onPersist={setIsPersist}
-        onClear={() => { strokesRef.current = [] }}
+        onClear={undoLastStroke}
+        onClearAll={() => { strokesRef.current = [] }}
         isRecording={isRecording}
         recSeconds={recSeconds}
         onStartRecord={startRecording}
