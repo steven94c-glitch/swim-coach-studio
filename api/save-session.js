@@ -1,13 +1,19 @@
 import { put } from '@vercel/blob'
 import { randomUUID } from 'crypto'
 
+export const config = { api: { bodyParser: false } }
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   try {
-    const { clips } = req.body
+    // Manually collect and parse JSON body (no framework body-parser here)
+    const chunks = []
+    for await (const chunk of req) chunks.push(chunk)
+    const { clips } = JSON.parse(Buffer.concat(chunks).toString())
+
     if (!Array.isArray(clips) || clips.length === 0) {
       return res.status(400).json({ error: 'clips array required' })
     }
