@@ -50,10 +50,11 @@ export default function Studio() {
       for (let i = 0; i < clips.length; i++) {
         const clip = clips[i]
         setExportProgress(`Uploading clip ${i + 1} of ${clips.length}...`)
+        const contentType = (clip.mimeType || 'video/webm').split(';')[0]
         const blob = await upload(`clips/clip-${clip.id}.${clip.ext || 'webm'}`, clip.blob, {
           access: 'public',
           handleUploadUrl: '/api/upload-clip',
-          contentType: clip.mimeType || 'video/webm',
+          contentType,
         })
         uploadedClips.push({ url: blob.url, note: clip.note || '' })
       }
