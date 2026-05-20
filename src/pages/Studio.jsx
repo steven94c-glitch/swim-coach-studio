@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { upload } from '@vercel/blob/client'
 import VideoAnnotator from '../components/VideoAnnotator'
 import ClipTray from '../components/ClipTray'
 import ShareModal from '../components/ShareModal'
@@ -49,14 +50,11 @@ export default function Studio() {
       for (let i = 0; i < clips.length; i++) {
         const clip = clips[i]
         setExportProgress(`Uploading clip ${i + 1} of ${clips.length}...`)
-        const res = await fetch('/api/upload-clip', {
-          method: 'PUT',
-          body: clip.blob,
-          headers: { 'Content-Type': 'video/webm' },
+        const blob = await upload(`clips/clip-${clip.id}.webm`, clip.blob, {
+          access: 'public',
+          handleUploadUrl: '/api/upload-clip',
         })
-        if (!res.ok) throw new Error(`Upload failed: ${res.statusText}`)
-        const { url } = await res.json()
-        uploadedClips.push({ url, note: clip.note || '' })
+        uploadedClips.push({ url: blob.url, note: clip.note || '' })
       }
       setExportProgress('Saving session...')
       const sessionRes = await fetch('/api/save-session', {

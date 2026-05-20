@@ -1,22 +1,23 @@
-import { put } from '@vercel/blob'
-
-export const config = { api: { bodyParser: false, responseLimit: false } }
+import { handleUpload } from '@vercel/blob/client'
 
 export default async function handler(req, res) {
-  if (req.method !== 'PUT') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
   try {
-    const filename = `clips/clip-${Date.now()}.webm`
-    // Stream req directly into Vercel Blob — no body size limit issues
-    const blob = await put(filename, req, {
-      access: 'public',
-      contentType: 'video/webm',
+    const chunks = []
+    for await (const chunk of req) chunks.push(chunk)
+    const body = JSON.parse(Buffer.concat(chunks).toString())
+
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async () => ({
+        allowedContentTypes: ['video/webm', 'video/mp4', 'application/octet-stream'],
+        maximumSizeInBytes: 500 * 1024 * 1024,
+      }),
+      onUploadCompleted: async () => {},
     })
-    return res.status(200).json({ url: blob.url })
+    return res.status(200).json(jsonResponse)
   } catch (err) {
     console.error('upload-clip error:', err)
-    return res.status(500).json({ error: err.message })
+    return res.status(400).json({ error: err.message })
   }
 }
