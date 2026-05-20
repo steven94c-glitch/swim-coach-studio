@@ -674,14 +674,25 @@ html, body, #root {
   flex-direction: column;
   background: #000;
   min-width: 0;
+  overflow: hidden;
+}
+
+.watch-video-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+  background: #000;
 }
 
 .watch-video {
-  flex: 1;
-  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   display: block;
-  object-fit: contain;
-  min-height: 0;
 }
 
 .watch-clip-nav {

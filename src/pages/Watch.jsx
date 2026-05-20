@@ -85,13 +85,15 @@ export default function Watch() {
 
       <div className="watch-body">
         <div className="watch-player">
-          <video
-            ref={videoRef}
-            className="watch-video"
-            controls
-            onEnded={handleClipEnded}
-            onPlay={() => setWatchedClips(prev => new Set([...prev, currentClipIndex]))}
-          />
+          <div className="watch-video-wrapper">
+            <video
+              ref={videoRef}
+              className="watch-video"
+              controls
+              onEnded={handleClipEnded}
+              onPlay={() => setWatchedClips(prev => new Set([...prev, currentClipIndex]))}
+            />
+          </div>
 
           {clips.length > 1 && (
             <div className="watch-clip-nav">
