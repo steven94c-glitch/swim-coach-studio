@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -67,9 +68,17 @@ function SortableClip({ clip, index, onNoteChange, onDelete }) {
 }
 
 export default function ClipTray({ clips, onNoteChange, onDelete, onReorder }) {
+  const trayRef = useRef(null)
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: { distance: 8 },
   }))
+
+  // Scroll to the newest clip when one is added
+  useEffect(() => {
+    if (clips.length > 0 && trayRef.current) {
+      trayRef.current.scrollTo({ left: trayRef.current.scrollWidth, behavior: 'smooth' })
+    }
+  }, [clips.length])
 
   const handleDragEnd = ({ active, over }) => {
     if (!over || active.id === over.id) return
@@ -79,7 +88,7 @@ export default function ClipTray({ clips, onNoteChange, onDelete, onReorder }) {
   }
 
   return (
-    <div className="clip-tray">
+    <div className="clip-tray" ref={trayRef}>
       {clips.length === 0 ? (
         <div className="clip-tray-empty">
           Hit ⏺ to record your first clip — then come back and record more at any point in the video.

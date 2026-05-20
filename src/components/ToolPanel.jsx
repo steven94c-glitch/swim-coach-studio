@@ -25,10 +25,10 @@ const SIZES = [
 export default function ToolPanel({
   tool, color, strokeSize, isPersist,
   onTool, onColor, onStrokeSize, onPersist, onClear,
-  isRecording, onStartRecord, onStopRecord,
+  isRecording, recSeconds, onStartRecord, onStopRecord,
 }) {
   return (
-    <div className="tool-panel">
+    <div className={`tool-panel ${isRecording ? 'tool-panel-recording' : ''}`}>
       {/* Drawing tools */}
       <div className="tool-section">
         {TOOLS.map(t => (
@@ -95,11 +95,13 @@ export default function ToolPanel({
       <button
         className={`btn-record ${isRecording ? 'recording' : ''}`}
         onClick={isRecording ? onStopRecord : onStartRecord}
-        title={isRecording ? 'Stop clip' : 'Start recording clip'}
+        title={isRecording ? 'Stop and save clip' : 'Start recording clip'}
       >
         {isRecording ? '⏹' : '⏺'}
       </button>
-      <span className="tool-label">{isRecording ? 'stop' : 'rec'}</span>
+      <span className="tool-label" style={{ color: isRecording ? 'var(--danger)' : undefined, fontWeight: isRecording ? 700 : undefined }}>
+        {isRecording ? 'STOP' : 'rec'}
+      </span>
     </div>
   )
 }

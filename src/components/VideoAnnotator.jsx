@@ -118,6 +118,8 @@ export default function VideoAnnotator({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [recSeconds, setRecSeconds] = useState(0)
+  const recTimerRef = useRef(null)
 
   // Keep mutable refs in sync so event handlers always read latest values
   const toolRef = useRef(tool)
@@ -295,10 +297,16 @@ export default function VideoAnnotator({
     recorder.start(200)
     mediaRecorderRef.current = recorder
     recordingStartRef.current = Date.now()
+    setRecSeconds(0)
+    recTimerRef.current = setInterval(() => {
+      setRecSeconds(s => s + 1)
+    }, 1000)
     onRecordingChange(true)
   }
 
   const stopRecording = () => {
+    clearInterval(recTimerRef.current)
+    setRecSeconds(0)
     mediaRecorderRef.current?.stop()
     onRecordingChange(false)
   }
@@ -333,6 +341,7 @@ export default function VideoAnnotator({
         onPersist={setIsPersist}
         onClear={() => { strokesRef.current = [] }}
         isRecording={isRecording}
+        recSeconds={recSeconds}
         onStartRecord={startRecording}
         onStopRecord={stopRecording}
       />
@@ -360,7 +369,14 @@ export default function VideoAnnotator({
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
           />
-          {isRecording && <div className="recording-badge">● REC</div>}
+          {isRecording && (
+            <>
+              <div className="recording-border" />
+              <div className="recording-badge">
+                ● REC &nbsp; {String(Math.floor(recSeconds / 60)).padStart(2, '0')}:{String(recSeconds % 60).padStart(2, '0')}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Hidden composite canvas used for recording */}
