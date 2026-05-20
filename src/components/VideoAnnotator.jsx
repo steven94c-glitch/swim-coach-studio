@@ -275,6 +275,11 @@ export default function VideoAnnotator({
   }
 
   const startRecording = async () => {
+    if (typeof MediaRecorder === 'undefined') {
+      alert('Video recording is not supported in this browser. Please use Chrome or Firefox.')
+      return
+    }
+
     strokesRef.current = []
     currentStrokeRef.current = null
     chunksRef.current = []
@@ -295,13 +300,26 @@ export default function VideoAnnotator({
       // Recording continues without audio if mic denied
     }
 
-    const mimeType = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
-      .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm'
+    // Safari only supports mp4; Chrome/Firefox support webm
+    const mimeType = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm',
+      'video/mp4;codecs=avc1,mp4a.40.2',
+      'video/mp4',
+    ].find(t => MediaRecorder.isTypeSupported(t)) || ''
+
+    if (!mimeType) {
+      alert('Your browser does not support canvas recording. Please use Chrome, Firefox, or Safari 14.1+.')
+      return
+    }
+
+    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'
 
     const recorder = new MediaRecorder(finalStream, { mimeType })
     recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
     recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'video/webm' })
+      const blob = new Blob(chunksRef.current, { type: mimeType })
       onClipRecorded({
         id: `clip-${Date.now()}`,
         blob,
@@ -309,6 +327,8 @@ export default function VideoAnnotator({
         thumbnail: thumbnailRef.current,
         note: '',
         duration: Date.now() - recordingStartRef.current,
+        mimeType,
+        ext,
       })
     }
 
